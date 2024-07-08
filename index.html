@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,15 +8,74 @@
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
 
 </head>
+
 <body>
 
     <h1>COCOCOC</h1>
     <div id="msg"></div>
 
+    <h2>Add User</h2>
+    <form id="addUserForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email"><br><br>
+        <button type="submit">Add User</button>
+    </form>
+
+    <h2>Users List</h2>
+    <ul id="usersList"></ul>
     <script>
         const SERVER = 'https://render-b.onrender.com'
         axios(SERVER).then(res => msg.innerHTML = res.data.Hello)
+
+        // Display hello message
+        axios.get(SERVER).then(res => {
+            document.getElementById('msg').innerHTML = res.data.Hello;
+        });
+
+        // Add user form submission
+        document.getElementById('addUserForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+
+            axios.post(`${SERVER}/add_user`, {
+                name: name,
+                email: email
+            })
+                .then(response => {
+                    alert(response.data.message);
+                    loadUsers();
+                })
+                .catch(error => {
+                    alert('Error adding user');
+                    console.log(error);
+                });
+        });
+
+        // Load users
+        function loadUsers() {
+            axios.get(`${SERVER}/home`)
+                .then(response => {
+                    const usersList = document.getElementById('usersList');
+                    usersList.innerHTML = '';
+                    response.data.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = `Name: ${user.name}, Email: ${user.email}`;
+                        usersList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    alert('Error loading users');
+                    console.log(error);
+                });
+        }
+
+        // Load users on page load
+        window.onload = loadUsers;
     </script>
-    
+
 </body>
+
 </html>
